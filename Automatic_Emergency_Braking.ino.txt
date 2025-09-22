@@ -1,0 +1,59 @@
+// Automatic Emergency Braking System
+// Components: Arduino UNO, Ultrasonic Sensor, DC Motor with Driver (L298N), Buzzer
+
+#define TRIG 9
+#define ECHO 10
+#define ENA 5
+#define IN1 6
+#define IN2 7
+#define BUZZER 8
+
+long duration;
+int distance;
+
+void setup() {
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Trigger ultrasonic pulse
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  // Calculate distance
+  duration = pulseIn(ECHO, HIGH);
+  distance = duration * 0.034 / 2;
+
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  if (distance < 20) {
+    // Emergency braking
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    analogWrite(ENA, 0);
+
+    // Alert driver
+    digitalWrite(BUZZER, HIGH);
+    Serial.println("⚠️ Emergency Brake Activated!");
+  } else {
+    // Normal driving
+    digitalWrite(BUZZER, LOW);
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    analogWrite(ENA, 200); // Normal speed
+  }
+
+  delay(300);
+}
